@@ -1,0 +1,12 @@
+/* Custom CSS to change the focus border color */
+.form-control:focus {
+    border-color: #ceafaf; /* Change to your desired border color */
+    box-shadow: 0 0 0 0.25rem rgba(255, 0, 0, 0.25); /* Change the rgba values for box-shadow if needed */
+}
+.box{
+    background-color: #e4c9c992; 
+    color: #fff; 
+    padding: 10px; 
+    box-shadow: 0 9px 10px rgba(0, 0, 0, 0.7); 
+    border-radius: 8px;
+}

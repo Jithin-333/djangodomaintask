@@ -1,0 +1,232 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+
+    <!-- style bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <link rel="stylesheet" href={% static 'css/admin_style.css' %}>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">
+
+    <title>admin page</title>
+
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-info">
+      <div class="container-fluid ">
+        <div class="ps-5">
+          <h1 class="navbar-brand ps-5  fw-bold fs-2 text-success"><i class="zmdi zmdi-account material-icons-name pe-3"></i>ADMIN <sub class="text-light fw-normal">panel</sub></h1>
+        </div>
+
+          <!-- User_Search Bar -->
+        <form action="{% url 'admin_search' %}" class="d-flex" method="POST" role="search">{% csrf_token %}
+            <input class="form-control me-2" type="search" name="search" placeholder="search...." aria-label="Search">
+            <button class="btn btn-warning" type="submit">Search</button>
+        </form>
+        
+        
+        <div class="collapse d-flex pe-5 btn-danger-center" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0 pe-5 ">
+      
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle btn btn-outline-success text-light" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Option
+              </a>
+              <ul class="dropdown-menu " aria-labelledby="navbarDropdown">
+                <li><a class="dropdown-item" href="{% url 'home' %}">Home</a></li>
+                <li><a class="dropdown-item"  data-bs-toggle="modal" data-bs-target="#create_user_id">Create User</a></li>
+                <li><hr class="dropdown-divider "></li>
+                <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+<!--~~~~~~~~~~ user details table form with edit and delete option~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <section>
+    <div class="text-center m-5">
+      <p class="fs-1 fw-bold text-muted">USER DETAILS</p>
+    </div>
+
+<!-- ~~~~~~~~~SHOWING MESSAGES~~~~~~~~-->
+    {% for message in messages %}
+      <div class="alert alert-{{message.tags}} alert-dismissible fade show col-xl-5 col-lg-6 col-md-7 col-10 mx-auto" role="alert">
+        <strong>{{message}}</strong> 
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+
+    <!-- user deatail table -->
+    <!-- table headings -->
+    <div class="box  m-5">
+      <table class="table align-middle mb-0 bg-white">
+        <thead>
+          <tr>
+            <th>name</th>
+            <th class="text-center">Super User</th>
+            <th class="text-center">Joined_date</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+
+        <!-- table-body-start -->
+        <tbody>
+          {% for user in users %}
+          <tr>
+            <td>
+              <div class="ms-1">
+                <p class="fw-bold mb-1">{{user.username}}</p>
+                <p class="text-muted mb-0">{{user.email | default:"email is not provided"}}</p>
+
+              </div>
+            </td>
+            <td class="text-center">
+              <p class="fw-normal mb-1">{{user.is_superuser}}</p>
+            </td>
+            <td class="text-center">
+              <p>{{user.date_joined}}</p>
+            </td>
+            <td class="text-center">
+              {% if not user.is_superuser %}
+                <button type="button" class="btn btn-primary btn-sm px-3" data-bs-toggle="modal" data-bs-target="#edit_id-{{forloop.counter}}">Edit</button>
+                <span class="p-3"></span>
+                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#delete_id-{{forloop.counter}}">Delete</button>
+              {% endif %}
+            </td> 
+          </tr>
+          {% endfor %}
+
+        </tbody>
+      </table>
+
+    </div>
+
+    <!-- section for models to edit  -->
+    {% for user in users %}
+      {% if not user.is_superuser %}
+        <div class="modal fade" id="edit_id-{{forloop.counter}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Edit User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <form action="{% url 'edit_user' user.id %}" method="POST" > {% csrf_token %}
+                
+                  <div class="form-group px-3">
+                      <label for="name"></label>
+                      <input class="form-control" type="text" name="username" id="username" value="{{user.username}}" />
+                  </div>
+                  <div class="form-group px-3">
+                      <label for="email"></label>
+                      <input class="form-control" type="email" name="user_email" id="email"  value="{{user.email}}"/>
+                  </div>
+                  {% comment %} <div class="form-group px-3">
+                      <label for="password1"></label>
+                      <input class="form-control" type="password" name="password" id="password1" placeholder="Password" />
+                  </div>
+                  <div class="form-group px-3">
+                      <label for="password2"></label>
+                      <input class="form-control" type="password" name="confirm_password" id="password2" placeholder="Confirm you Password" />
+                  </div> {% endcomment %}
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-success">Save Changes</button>
+                  </div>
+                
+                </form>
+              </div>
+              
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+
+    <!-- delete modal -->
+<!-- Modal -->
+    {% for user in users %}
+      {% if not a %}
+        <div class="modal fade" id="delete_id-{{forloop.counter}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Delete Confirmation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <h4>This action cannot be undone. Are you sure you want to delete?</h4>
+                
+              </div>
+              <div class="modal-footer text-center">
+                <h4 class="pe-5">Delete User : <span class="text-info">{{user.username}}</span></h4>
+
+                <form action="{% url 'delete_user' user.id %}" method="POST">{% csrf_token %}
+                  <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+
+    <!-- CREATE_MODEL -->
+    <!-- user creation model -->
+    <div class="modal fade" id="create_user_id" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Create a New User</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-center">
+            <form action="{% url 'create_user' %}" method="POST">{% csrf_token %}
+             
+              <div class="form-group p-3">
+                  <label for="name"><i class="zmdi zmdi-account material-icons-name"></i></label>
+                  <input class="form-control border " type="text" name="user_name" id="user_name" placeholder="Your Name" required/>
+              </div>
+              <div class="form-group p-3">
+                  <label for="email"><i class="zmdi zmdi-email"></i></label>
+                  <input class="form-control" type="email" name="user_email" id="user_email" placeholder="Your Email" required/>
+              </div>
+              <div class="form-group p-3">
+                  <label for="password1"><i class="zmdi zmdi-lock"></i></label>
+                  <input class="form-control" type="password" name="password" id="password" placeholder="Password" required/>
+              </div>
+              <div class="form-group p-3">
+                  <label for="password2"><i class="zmdi zmdi-lock-outline"></i></label>
+                  <input class="form-control" type="password" name="confirm_password" id="confirm_password" placeholder="Repeat your password" required/>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-success">create</button>
+              </div>
+             
+            </form>
+
+          </div>
+          
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+<!--~~~~~~~~~~ End of user details table with edit and delete forms~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+    <!-- script bootstrap bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <!-- other scripts -->
+
+</body>
+</html>
